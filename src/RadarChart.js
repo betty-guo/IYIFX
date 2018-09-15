@@ -8,7 +8,6 @@ class RadarChart extends Component {
       textStyle: {
         fontFamily: 'Open Sans'
       },
-      tooltip: {},
       radar: {
         name: {
           textStyle: {

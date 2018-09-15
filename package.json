@@ -12,6 +12,9 @@
     "react-dom": "^16.5.1",
     "react-scripts": "1.1.5",
     "react-slick": "^0.23.1",
+    "react-typewriter": "^0.4.1",
+    "react-typist": "^2.0.4",
+    "react-typist-loop": "0.0.5",
     "semantic-ui-css": "^2.3.3",
     "semantic-ui-react": "^0.82.5",
     "slick-carousel": "^1.8.1"

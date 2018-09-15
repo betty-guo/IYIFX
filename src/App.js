@@ -1,9 +1,13 @@
 import React, { Component } from 'react'
-import { Search, Grid, Segment, Image } from 'semantic-ui-react'
+import { Loader, Dimmer, Header, Search, Grid, Segment, Image } from 'semantic-ui-react'
 import Slider from "react-slick"
 import axios from 'axios'
 import Clarifai from 'clarifai'
 import RadarChart from './RadarChart'
+import Typist from 'react-typist'
+import TypistLoop from 'react-typist-loop'
+
+import mhilogo from './mhi_logo.png'
 
 import './App.css'
 import 'slick-carousel/slick/slick.css'
@@ -24,6 +28,8 @@ class InstagramSearch extends Component {
   }
 
   handleResultSelect = async (e, { result }) => {
+    this.props.setHasSearched(true)
+
     this.setState({ value: result.title })
 
     // Goddamnit CORS on instagram
@@ -31,7 +37,7 @@ class InstagramSearch extends Component {
     this.props.setIsComputing(true)
     const { data, followers } = await axios.post('https://us-central1-hack-the-north-2018-216509.cloudfunctions.net/getInstagramUserProfile', {username: result.title}).then(x => x.data)
 
-    this.props.setComputingText('Extracting color information')
+    this.props.setComputingText('Extracting color information...')
     const comments = data.map(x => x.comments)
     const likes = data.map(x => x.likes)
     const pictures = data.map(x => x.picture)
@@ -41,12 +47,12 @@ class InstagramSearch extends Component {
                         .then(x => x.outputs)
 
     // Get data on moderation
-    this.props.setComputingText('Extracting moderation information')
+    this.props.setComputingText('Extracting moderation information...')
     const moderationData = await clarifaiApp.models.predict('d16f390eb32cad478c7ae150069bd2c6', pictures)
                         .then(x => x.outputs)
 
     // General (can see person, but can't see faces)
-    this.props.setComputingText('Extracting general information')
+    this.props.setComputingText('Extracting general information...')
     const generalData = await clarifaiApp.models.predict('aaa03c23b3724a16a56b629203edc62c', pictures)
                         .then(x => x.outputs)
 
@@ -237,11 +243,84 @@ class Summary extends Component {
   }
 }
 
+class FirstPage extends Component {
+  render () {
+    return (
+      <div>
+        <Header as='h2' textAlign='center'>
+        <Image src={mhilogo} size='large'/>
+        <Header.Content>
+        <TypistLoop interval={3000}>
+          {[
+            'Mental Health on Instagram',
+            'Match Symptoms from Instagram Posts',
+            'MHI',
+          ].map(text => <Typist key={text} startDelay={1000}>{text}</Typist>)}
+        </TypistLoop>
+        </Header.Content>
+      </Header>
+      <InstagramSearch
+        setHasSearched={this.props.setHasSearched}
+        setComputingText={this.props.setComputingText}
+        setPossiblyDepressedPictures={this.props.setPossiblyDepressedPictures}
+        setIsComputing={this.props.setIsComputing}
+        />
+      </div>
+    )
+  }
+}
+
+class SecondPage extends Component {
+  render () {
+    const { possiblyDepressedPictures, isComputing, computingText } = this.props
+    return ( 
+      isComputing ?
+      <Segment style={{height: '100vh'}}>
+        <Dimmer active inverted>
+          <Loader>{computingText}</Loader>
+        </Dimmer>
+      </Segment>
+      :
+      <div style={{marginTop: '100px'}}>
+        <Summary depressingPicsNo={possiblyDepressedPictures.length} />
+        <Slider
+          dots={true}
+          fade={true}
+          arrows={true}
+          className='slides'
+        >
+          {
+            possiblyDepressedPictures.map((x) => {
+              return (
+                <div>
+                  <RadarChart {...x} />
+                  <Image centered={true} height={350} src={x.image} />
+                </div>
+              )
+            })
+          }
+        </Slider>
+        <br/><br/><br/>
+        <hr />
+        <p>
+          Implementation loosely based on <a href='https://arxiv.org/pdf/1608.03282.pdf'>this arxiv paper.</a><br/>
+          <a href='#' onClick={() => this.props.setHasSearched(false)}>Do another search.</a>
+        </p>
+      </div>
+    )
+  }
+}
+
 class App extends Component {
   state = {
+    hasSearched: false,
     isComputing: false,
     computingText: 'Loading...',
     possiblyDepressedPictures: undefined
+  }
+
+  setHasSearched = (b) => {
+    this.setState({ hasSearched: b })
   }
 
   setComputingText = (t) => {
@@ -257,49 +336,28 @@ class App extends Component {
   }
 
   render() {
-    const { isComputing, computingText, possiblyDepressedPictures } = this.state
+    const { hasSearched, isComputing, computingText, possiblyDepressedPictures } = this.state
 
     return (
-      <Grid columns={3} stackable>
-        <Grid.Row stretched>
+      <Grid columns={3} verticalAlign='middle' style={{ height: '100vh' }}>
+        <Grid.Row stretched verticalAlign='middle'>
           <Grid.Column width={2}/>
           <Grid.Column verticalAlign='middle' textAlign='center' width={12}>
-            <Segment vertical>
-              <InstagramSearch
-                setComputingText={this.setComputingText}
-                setPossiblyDepressedPictures={this.setPossiblyDepressedPictures}
-                setIsComputing={this.setIsComputing}
+            <Segment vertical textAlign='center' style={{marginTop: '-15vh'}}>
+              {
+                !hasSearched ?
+                <FirstPage
+                  setHasSearched={this.setHasSearched}
+                  setComputingText={this.setComputingText}
+                  setPossiblyDepressedPictures={this.setPossiblyDepressedPictures}
+                  setIsComputing={this.setIsComputing}
+                /> :
+                <SecondPage
+                  possiblyDepressedPictures={possiblyDepressedPictures}
+                  isComputing={isComputing}
+                  computingText={computingText}
+                  setHasSearched={this.setHasSearched}
                 />
-              { isComputing ?
-              <div>{computingText}</div>
-              :
-              <div>
-                {
-                  possiblyDepressedPictures === undefined ?
-                  <div/>
-                  :
-                  <div>
-                    <Summary depressingPicsNo={possiblyDepressedPictures.length} />
-                    <Slider
-                      dots={true}
-                      fade={true}
-                      arrows={true}
-                      className='slides'
-                    >
-                      {
-                        possiblyDepressedPictures.map((x) => {
-                          return (
-                            <div>
-                              <RadarChart {...x} />
-                              <Image centered={true} height={400} src={x.image} />
-                            </div>
-                          )
-                        })
-                      }
-                    </Slider>
-                  </div>
-                }
-              </div>
               }
             </Segment>
           </Grid.Column>
