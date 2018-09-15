@@ -5,6 +5,8 @@
   "dependencies": {
     "axios": "^0.18.0",
     "clarifai": "^2.8.1",
+    "echarts": "^4.2.0-rc.1",
+    "echarts-for-react": "^2.0.14",
     "node-fetch": "^2.2.0",
     "react": "^16.5.1",
     "react-dom": "^16.5.1",

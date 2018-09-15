@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Search, Grid, Segment, Table, Button, Rating, Input, Header, Image } from 'semantic-ui-react'
 import axios from 'axios'
 import Clarifai from 'clarifai'
+import RadarChart from './RadarChart'
 
 import './App.css'
 import 'semantic-ui-css/semantic.min.css'
@@ -179,6 +180,7 @@ class App extends Component {
           <Grid.Column verticalAlign='middle' textAlign='center'>
             <Segment vertical>
               <InstagramSearch />
+              <RadarChart />
             </Segment>
           </Grid.Column>
           <Grid.Column />
