@@ -12,21 +12,6 @@ const clarifaiApp = new Clarifai.App({
   apiKey: `6bcf849cc1b04b889d8ab09af9b516f5`
 })
 
-const getMedian= (values) => {
-  values.sort((a,b) => {
-    return a-b
-  })
-
-  if(values.length ===0) return 0
-
-  var half = Math.floor(values.length / 2);
-
-  if (values.length % 2)
-    return values[half];
-  else
-    return (values[half - 1] + values[half]) / 2.0;
-}
-
 class InstagramSearch extends Component {
   state = {
     isLoading: false,
@@ -58,39 +43,6 @@ class InstagramSearch extends Component {
                         .then(x => x.outputs)
 
     // Calculate depressiveness
-    const depressingColorsDict = {
-      rosybrown: true,
-      black: true,
-      magenta: true,
-      mediumpurple: true,
-      blueviolet: true,
-      indigo: true,
-      palegoldenrod: true,
-      thistle: true,
-      darkorchid: true,
-      darksalmon: true,
-    }
-
-    const colorScore = colorData.reduce((acc, c) => {
-      const depressingColors = c.data.colors.filter(x => {
-        const xprime = x.w3c.name.toLowerCase()
-        return depressingColorsDict[xprime] || false
-      })
-
-      console.log(depressingColors)
-
-      if (depressingColors.length < 3) {
-        return acc
-      }
-
-      return acc + 5
-    }, 0) / colorData.length
-
-    console.log(colorScore)
-
-    console.log(colorData)
-    console.log(moderationData)
-    console.log(generalData)
 
     // Colors that indicate depression
     // If > 2 colors have > 25% then its likely
@@ -109,10 +61,45 @@ class InstagramSearch extends Component {
     // 10. Dark Orchid + Black
     // 11. Linen + Black
     // 12. Dark Salmon
+    const depressingColorsDict = {
+      rosybrown: true,
+      black: true,
+      magenta: true,
+      mediumpurple: true,
+      blueviolet: true,
+      indigo: true,
+      palegoldenrod: true,
+      thistle: true,
+      darkorchid: true,
+      darksalmon: true,
+    }
+
+    const colorScores = colorData.map((c) => {
+      const colors = c.data.colors.filter(x => x.value > 0.2)
+      const depressingColors = colors.filter(x => {
+        const xprime = x.w3c.name.toLowerCase()
+        return depressingColorsDict[xprime] || false
+      })
+
+      if (depressingColors.length < 1) {
+        return 0
+      }
+
+      return 1
+    })
 
     // Moderation, check for drugs and gore
     // 1. drugs
     // 2. gore
+    const moderationScores = moderationData.map(c => {
+      const depressingConcepts = c.data.concepts
+        .filter(x => x.value > 0.75)
+        .filter(x => {
+          return x.name === 'drug' || x.name === 'gore'
+        })
+      
+      return (depressingConcepts.length > 0 ? 1 : 0)
+    })
 
     // General data (filter out <0.75 confidence)
     // 1. one
@@ -120,11 +107,60 @@ class InstagramSearch extends Component {
     // 3. smoke
     // 4. dark
     // 5. has one/people/girl/man in it, but lacks facial expression
+    const generalScores = generalData.map((c) => {
+      const generalConcepts = c.data.concepts
+        .filter(x => x.value > 0.75)
+        .map(x => x.name)
+        .reduce((map, a) => {
+          map[a] = true;
+          return map
+        }, {'facial expression': false, 'one': false, 'people': false, 'smoke': false, 'dark': false, 'girl': false, 'man': false})
 
-    // Has recurring < 3 comments
+      // If has people and no facial expression
+      if ((generalConcepts['one'] || generalConcepts['people'] || generalConcepts['man'] || generalConcepts['girl'])){
+        if (!generalConcepts['facial expression']) {
+          return 1
+        }
+      }
+
+      return 0
+    })
+
     // IF user has < 1k followers,
     // then if User like is < 10% of following, then + 1
     // else if < 3% following, then + 1
+    const likeEngagementScores = likes.map(x => {
+      if (followers > 1000) {
+        if (x < followers * 0.03) {
+          return 1
+        }
+        return 0
+      } else {
+        return (x < followers * 0.1) ? 1 : 0
+      }
+    })
+
+    // Has recurring < 3 comments
+    const commentEngagementScores = comments.map(x => {
+      return (x > 3) ? 0 : 1
+    })
+
+    pictures.map((x, i) => {
+      // If score > 4 then its probably
+      // bad score
+      const totalScore = commentEngagementScores[i] +
+                    likeEngagementScores[i] +
+                    generalScores[i] + 
+                    moderationScores[i] +
+                    colorScores[i]
+      
+      if (totalScore >= 4) {
+        console.log(x)
+      }
+    })
+
+    console.log('done')
+    
 
     // TODO: Grab User data
     // this.props.gatherUserData({
