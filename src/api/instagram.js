@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 
-const getInstagramProfileData = async (profileName) => {
-  const text = await fetch(`https://instagram.com/${profileName}`).then(x => x.text())
+const getInstagramProfileData = async (username) => {
+  const text = await fetch(`https://instagram.com/${username}`).then(x => x.text())
 
   const regexExpr = /<script type="text\/javascript">window\._sharedData = (.*?);<\/script>/
 
@@ -13,10 +13,18 @@ const getInstagramProfileData = async (profileName) => {
 
   const edges = jsonMatches.entry_data.ProfilePage[0].graphql.user.edge_owner_to_timeline_media.edges
 
-  const likedCount = edges.map(x => x.node.edge_liked_by.count)
-  const commentCount = edges.map(x => x.node.edge_media_to_comment.count)
-  const captions = edges.map(x => x.node.edge_media_to_caption.edges[0].node.text)
-  const pictures = edges.map(x => x.node.display_url)
+  const likedCount = edges.map(x => {
+    try { return x.node.edge_liked_by.count } catch (e) { return '' }
+  })
+  const commentCount = edges.map(x => {
+    try { return x.node.edge_media_to_comment.count } catch (e) { return '' }
+  })
+  const captions = edges.map(x => {
+    try { return x.node.edge_media_to_caption.edges[0].node.text } catch (e) { return '' }
+  })
+  const pictures = edges.map(x => {
+    try { return x.node.display_url } catch (e) { return '' }
+  })
 
   return pictures.map((x, idx) => {
     return {
@@ -28,11 +36,9 @@ const getInstagramProfileData = async (profileName) => {
   })
 }
 
-// const main = async () => {
-//   const d = await getInstagramProfileData('sadgxrly')
-//   console.log(d)
-// }
+const a = async () => {
+  const d = await getInstagramProfileData('selenagomez')
+  console.log(d)
+}
 
-// main()
-
-module.exports = { getInstagramProfileData }
+a()
