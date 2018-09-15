@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Search, Grid, Segment, Table, Button, Rating, Input, Header, Image } from 'semantic-ui-react'
+import { Search, Grid, Segment } from 'semantic-ui-react'
 import axios from 'axios'
 import Clarifai from 'clarifai'
 import RadarChart from './RadarChart'
@@ -24,8 +24,11 @@ class InstagramSearch extends Component {
     this.setState({ value: result.title })
 
     // Goddamnit CORS on instagram
+    this.props.setComputingText('Loading...')
+    this.props.setIsComputing(true)
     const { data, followers } = await axios.post('https://us-central1-hack-the-north-2018-216509.cloudfunctions.net/getInstagramUserProfile', {username: result.title}).then(x => x.data)
 
+    this.props.setComputingText('Obtained instagram data, getting color info')
     const comments = data.map(x => x.comments)
     const likes = data.map(x => x.likes)
     const pictures = data.map(x => x.picture)
@@ -35,15 +38,16 @@ class InstagramSearch extends Component {
                         .then(x => x.outputs)
 
     // Get data on moderation
+    this.props.setComputingText('Getting moderation information')
     const moderationData = await clarifaiApp.models.predict('d16f390eb32cad478c7ae150069bd2c6', pictures)
                         .then(x => x.outputs)
 
     // General (can see person, but can't see faces)
+    this.props.setComputingText('Getting general information')
     const generalData = await clarifaiApp.models.predict('aaa03c23b3724a16a56b629203edc62c', pictures)
                         .then(x => x.outputs)
 
     // Calculate depressiveness
-
     // Colors that indicate depression
     // If > 2 colors have > 25% then its likely
     // OR if 2 colors have > 40% then its likely
@@ -145,7 +149,7 @@ class InstagramSearch extends Component {
       return (x > 3) ? 0 : 1
     })
 
-    pictures.map((x, i) => {
+    const possiblyDepressedPictures = pictures.reduce((acc, x, i) => {
       // If score > 4 then its probably
       // bad score
       const totalScore = commentEngagementScores[i] +
@@ -155,18 +159,19 @@ class InstagramSearch extends Component {
                     colorScores[i]
       
       if (totalScore >= 4) {
-        console.log(x)
+        acc.push({
+          commentEngagement: commentEngagementScores[i],
+          likeEngagement: likeEngagementScores[i],
+          generalScore: generalScores[i],
+          moderationScore: moderationScores[i],
+          colorScore: colorScores[i],
+        })
       }
-    })
+      return acc
+    }, [])
 
-    console.log('done')
-    
-
-    // TODO: Grab User data
-    // this.props.gatherUserData({
-    //   username: result.title,
-    //   isUserPrivate: result.isprivate
-    // })
+    this.props.setPossiblyDepressedPictures(possiblyDepressedPictures)
+    this.props.setIsComputing(false)
   }
 
   handleSearchChange = (e, { value }) => {
@@ -208,15 +213,43 @@ class InstagramSearch extends Component {
 }
 
 class App extends Component {
+  state = {
+    isComputing: false,
+    computingText: 'Loading...',
+    possiblyDepressedPictures: []
+  }
+
+  setComputingText = (t) => {
+    this.setState({ computingText: t })
+  }
+
+  setIsComputing = (b) => {
+    this.setState({ isComputing: b })
+  }
+
+  setPossiblyDepressedPictures = (p) => {
+    this.setState({ possiblyDepressedPictures: p })
+  }
+
   render() {
+    const { isComputing, computingText } = this.state
+
     return (
       <Grid columns={3} stackable>
         <Grid.Row stretched>
           <Grid.Column />
           <Grid.Column verticalAlign='middle' textAlign='center'>
             <Segment vertical>
-              <InstagramSearch />
+              <InstagramSearch
+                setComputingText={this.setComputingText}
+                setPossiblyDepressedPictures={this.setPossiblyDepressedPictures}
+                setIsComputing={this.setIsComputing}
+                />
+              { isComputing ?
+              <div>{computingText}</div>
+              :
               <RadarChart />
+              }
             </Segment>
           </Grid.Column>
           <Grid.Column />
