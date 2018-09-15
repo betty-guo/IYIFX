@@ -1,14 +1,23 @@
 import React, { Component } from 'react'
 import ReactEcharts from 'echarts-for-react'
+import './RadarChart.css'
 
 var option = {
-    title: {
-        text: 'Depressed Meter'
+    //title: {
+      //  text: 'Depressed Meter'
+    //},
+    color: ['#0F0E1C','#88C2E5','#FFFFFF'],
+    grid: {
+      width: '100vh',
+      height: '100vh'
+    },
+    textStyle: {
+      fontFamily: 'Open Sans'
     },
     tooltip: {},
-    legend: {
-        data: ['预算分配（Allocated Budget）', '实际开销（Actual Spending）']
-    },
+    //legend: {
+      //  data: ['预算分配（Allocated Budget）', '实际开销（Actual Spending）']
+    //},
     radar: {
         // shape: 'circle',
         name: {
@@ -25,20 +34,22 @@ var option = {
            { name: '信息技术（Information Techology）', max: 30000},
            { name: '客服（Customer Support）', max: 38000},
            { name: '研发（Development）', max: 52000},
-           { name: '市场（Marketing）', max: 25000}
+           //{ name: '市场（Marketing）', max: 25000}
         ]
     },
     series: [{
         name: '预算 vs 开销（Budget vs spending）',
         type: 'radar',
-        // areaStyle: {normal: {}},
+        areaStyle: {normal: {}},
         data : [
             {
-                value : [4300, 10000, 28000, 35000, 50000, 19000],
+                //value : [4300, 10000, 28000, 35000, 50000, 19000],
+                value : [4300, 10000, 28000, 35000, 50000],
                 name : '预算分配（Allocated Budget）'
             },
              {
-                value : [5000, 14000, 28000, 31000, 42000, 21000],
+                //value : [5000, 14000, 28000, 31000, 42000, 21000],
+                value : [5000, 14000, 28000, 31000, 50000],
                 name : '实际开销（Actual Spending）'
             }
         ]
@@ -49,7 +60,7 @@ var option = {
 class RadarChart extends Component {
   render() {
     return (
-        <div>
+        <div className = 'betty'>
           <ReactEcharts
             option={ option }
             />

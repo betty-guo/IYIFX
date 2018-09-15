@@ -176,14 +176,14 @@ class App extends Component {
     return (
       <Grid columns={3} stackable>
         <Grid.Row stretched>
-          <Grid.Column />
-          <Grid.Column verticalAlign='middle' textAlign='center'>
+          <Grid.Column width={2}/>
+          <Grid.Column verticalAlign='middle' textAlign='center' width={12}>
             <Segment vertical>
               <InstagramSearch />
               <RadarChart />
             </Segment>
           </Grid.Column>
-          <Grid.Column />
+          <Grid.Column width={2}/>
         </Grid.Row>
       </Grid>
     )
