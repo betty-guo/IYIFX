@@ -283,6 +283,7 @@ class SecondPage extends Component {
       :
       <div style={{marginTop: '100px'}}>
         <Summary depressingPicsNo={possiblyDepressedPictures.length} />
+        <hr />
         <Slider
           dots={true}
           fade={true}
@@ -292,10 +293,16 @@ class SecondPage extends Component {
           {
             possiblyDepressedPictures.map((x) => {
               return (
-                <div>
-                  <RadarChart {...x} />
-                  <Image centered={true} height={350} src={x.image} />
-                </div>
+                <Grid columns={2}>
+                  <Grid.Row>
+                    <Grid.Column>
+                      <RadarChart {...x} />
+                    </Grid.Column>
+                    <Grid.Column>
+                      <Image centered={true} height={350} src={x.image} />
+                    </Grid.Column>
+                  </Grid.Row>
+                </Grid>
               )
             })
           }

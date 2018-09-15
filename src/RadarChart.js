@@ -15,8 +15,8 @@ class RadarChart extends Component {
           }
         },
         indicator: [
-          { name: 'Comment Disengagement', max: 1 },
-          { name: 'Like Disengagement', max: 1 },
+          { name: 'Comment', max: 1 },
+          { name: 'Like', max: 1 },
           { name: 'Color', max: 1 },
           { name: 'Moderation', max: 1 },
           { name: 'General', max: 1 }
