@@ -1,10 +1,13 @@
 import React, { Component } from 'react'
-import { Search, Grid, Segment } from 'semantic-ui-react'
+import { Search, Grid, Segment, Image } from 'semantic-ui-react'
+import Slider from "react-slick"
 import axios from 'axios'
 import Clarifai from 'clarifai'
 import RadarChart from './RadarChart'
 
 import './App.css'
+import 'slick-carousel/slick/slick.css'
+import 'slick-carousel/slick/slick-theme.css'
 import 'semantic-ui-css/semantic.min.css'
 
 // LOL please don't steal our free API key lmao
@@ -28,7 +31,7 @@ class InstagramSearch extends Component {
     this.props.setIsComputing(true)
     const { data, followers } = await axios.post('https://us-central1-hack-the-north-2018-216509.cloudfunctions.net/getInstagramUserProfile', {username: result.title}).then(x => x.data)
 
-    this.props.setComputingText('Obtained instagram data, getting color info')
+    this.props.setComputingText('Extracting color information')
     const comments = data.map(x => x.comments)
     const likes = data.map(x => x.likes)
     const pictures = data.map(x => x.picture)
@@ -38,12 +41,12 @@ class InstagramSearch extends Component {
                         .then(x => x.outputs)
 
     // Get data on moderation
-    this.props.setComputingText('Getting moderation information')
+    this.props.setComputingText('Extracting moderation information')
     const moderationData = await clarifaiApp.models.predict('d16f390eb32cad478c7ae150069bd2c6', pictures)
                         .then(x => x.outputs)
 
     // General (can see person, but can't see faces)
-    this.props.setComputingText('Getting general information')
+    this.props.setComputingText('Extracting general information')
     const generalData = await clarifaiApp.models.predict('aaa03c23b3724a16a56b629203edc62c', pictures)
                         .then(x => x.outputs)
 
@@ -160,11 +163,12 @@ class InstagramSearch extends Component {
       
       if (totalScore >= 4) {
         acc.push({
-          commentEngagement: commentEngagementScores[i],
-          likeEngagement: likeEngagementScores[i],
+          commentDisengagement: commentEngagementScores[i],
+          likeDisengagement: likeEngagementScores[i],
           generalScore: generalScores[i],
           moderationScore: moderationScores[i],
           colorScore: colorScores[i],
+          image: pictures[i]
         })
       }
       return acc
@@ -204,10 +208,31 @@ class InstagramSearch extends Component {
         loading={isLoading}
         onResultSelect={this.handleResultSelect}
         onSearchChange={this.handleSearchChange}
-        placeholder="Target Instagram profile username"
+        placeholder="Instagram handle"
         results={results}
         value={value}
+        isprivate='false'
       />
+    )
+  }
+}
+
+class Summary extends Component {
+  render () {
+    const { depressingPicsNo } = this.props
+
+    if (depressingPicsNo === 0) {
+      return (
+        <h3 style={{paddingTop: '50px'}}>
+          No symptoms found!
+        </h3>
+      )
+    }
+
+    return (
+      <h3 style={{paddingTop: '50px'}}>
+        Identified <strong>{depressingPicsNo}</strong> images that displays symptoms related to poor mental health.
+      </h3>
     )
   }
 }
@@ -216,7 +241,7 @@ class App extends Component {
   state = {
     isComputing: false,
     computingText: 'Loading...',
-    possiblyDepressedPictures: []
+    possiblyDepressedPictures: undefined
   }
 
   setComputingText = (t) => {
@@ -232,7 +257,7 @@ class App extends Component {
   }
 
   render() {
-    const { isComputing, computingText } = this.state
+    const { isComputing, computingText, possiblyDepressedPictures } = this.state
 
     return (
       <Grid columns={3} stackable>
@@ -248,7 +273,33 @@ class App extends Component {
               { isComputing ?
               <div>{computingText}</div>
               :
-              <RadarChart />
+              <div>
+                {
+                  possiblyDepressedPictures === undefined ?
+                  <div/>
+                  :
+                  <div>
+                    <Summary depressingPicsNo={possiblyDepressedPictures.length} />
+                    <Slider
+                      dots={true}
+                      fade={true}
+                      arrows={true}
+                      className='slides'
+                    >
+                      {
+                        possiblyDepressedPictures.map((x) => {
+                          return (
+                            <div>
+                              <RadarChart {...x} />
+                              <Image centered={true} height={400} src={x.image} />
+                            </div>
+                          )
+                        })
+                      }
+                    </Slider>
+                  </div>
+                }
+              </div>
               }
             </Segment>
           </Grid.Column>
