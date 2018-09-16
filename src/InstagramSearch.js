@@ -1,11 +1,7 @@
 import React, { Component } from 'react'
-import { Loader, Dimmer, Header, Search, Grid, Segment, Image } from 'semantic-ui-react'
-import Slider from "react-slick"
+import { Search } from 'semantic-ui-react'
 import axios from 'axios'
 import Clarifai from 'clarifai'
-import RadarChart from './RadarChart'
-import Typist from 'react-typist'
-import TypistLoop from 'react-typist-loop'
 
 
 // LOL please don't steal our free API key lmao
