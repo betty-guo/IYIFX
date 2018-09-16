@@ -16,7 +16,7 @@ import 'semantic-ui-css/semantic.min.css'
 
 // LOL please don't steal our free API key lmao
 const clarifaiApp = new Clarifai.App({
-  apiKey: `6bcf849cc1b04b889d8ab09af9b516f5`
+  apiKey: `5b9a68775f4342ec9529ac53698ebe96`
 })
 
 class InstagramSearch extends Component {
