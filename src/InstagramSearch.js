@@ -5,8 +5,10 @@ import Clarifai from 'clarifai'
 
 
 // LOL please don't steal our free API key lmao
+// 5b9a68775f4342ec9529ac53698ebe96
+// NEW: 0eae671e21c545f08f3078ff35e9097e
 const clarifaiApp = new Clarifai.App({
-  apiKey: `5b9a68775f4342ec9529ac53698ebe96`
+  apiKey: `0eae671e21c545f08f3078ff35e9097e`
 })
 
 class InstagramSearch extends Component {

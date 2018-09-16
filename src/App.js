@@ -20,7 +20,7 @@ class Summary extends Component {
     if (depressingPicsNo === 0) {
       return (
         <h3 style={{paddingTop: '50px'}}>
-          No symptoms found!
+          It is wonderful that your friend shows no signs of mental illness. But remember, check in on them even when they seem they’re fine!
         </h3>
       )
     }
@@ -30,11 +30,10 @@ class Summary extends Component {
         <h3 style={{paddingTop: '50px'}}>
           Identified <strong>{depressingPicsNo}</strong> images that displays symptoms related to poor mental health.<br/>
         </h3>
-        {
-          depressingPicsNo.length < 5 ?
-          <p>The symptoms seems to be in the mild-moderate range. Try complimenting their day, or congratulate them on an accomplishment.</p> :
-          <p>They look like they're struggling a bit, perhaps invite them out for lunch/coffee?</p>
-        }
+        <p>
+          Please check in on them, spend some quality time, and hear them out. Sometimes a talk can be a big help!<br/>
+          If you think they are in a place where you can’t help them, provide them with support lines and professional guidance.
+        </p>
       </div>
     )
   }
