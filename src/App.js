@@ -110,7 +110,7 @@ class InstagramSearch extends Component {
         .filter(x => {
           return x.name === 'drug' || x.name === 'gore'
         })
-      
+
       return (depressingConcepts.length > 0 ? 1 : 0)
     })
 
@@ -163,10 +163,10 @@ class InstagramSearch extends Component {
       // bad score
       const totalScore = commentEngagementScores[i] +
                     likeEngagementScores[i] +
-                    generalScores[i] + 
+                    generalScores[i] +
                     moderationScores[i] +
                     colorScores[i]
-      
+
       if (totalScore >= 4) {
         acc.push({
           commentDisengagement: commentEngagementScores[i],
@@ -253,7 +253,7 @@ class FirstPage extends Component {
         <TypistLoop interval={3000}>
           {[
             'Mental Health on Instagram',
-            'Match Symptoms from Instagram Posts',
+            'Check up on your loved ones',
             'MHI',
           ].map(text => <Typist key={text} startDelay={1000}>{text}</Typist>)}
         </TypistLoop>
@@ -273,7 +273,7 @@ class FirstPage extends Component {
 class SecondPage extends Component {
   render () {
     const { possiblyDepressedPictures, isComputing, computingText } = this.props
-    return ( 
+    return (
       isComputing ?
       <Segment style={{height: '100vh'}}>
         <Dimmer active inverted>
