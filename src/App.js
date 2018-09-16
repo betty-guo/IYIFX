@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
-import { Loader, Dimmer, Header, Search, Grid, Segment, Image } from 'semantic-ui-react'
+import { Loader, Dimmer, Header, Grid, Segment, Image } from 'semantic-ui-react'
 import Slider from "react-slick"
-import axios from 'axios'
-import Clarifai from 'clarifai'
 import RadarChart from './RadarChart'
 import Typist from 'react-typist'
 import TypistLoop from 'react-typist-loop'
